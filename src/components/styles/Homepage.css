@@ -1,0 +1,80 @@
+/* Common Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+p {
+    font-size: 16px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.blueicon {
+    text-align: center;
+    margin-top: 20px;
+    background-color: #007bff;
+    border-radius: 70px 70px 70px 70px;
+    width: 70px;
+    height: 70px;
+    padding: 20px;
+    margin: 10px 0px 50px 120px;
+}
+
+.blue {
+    color: rgb(253, 253, 253);
+    font-size: 50px;
+    padding-top: 10px;
+}
+
+.custom-button {
+    display: block;
+    margin: 10px auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 150px; /* Decreased width */
+    height: 40px; /* Decreased height */
+    margin-bottom: 20px; /* Increase margin between buttons */
+    transition: background-color 0.3s, transform 0.3s; /* Smooth transition */
+}
+
+.custom-button:hover {
+    background-color: #0056b3; /* Darker color on hover */
+    transform: scale(1.1); /* Scale effect on hover */
+}
+
+.blue-heading {
+    color: #50a0eb;
+    margin-top: 40px;
+    font-size: 1.5em;
+    font-family: cursive;
+}
+
+/* Mobile Styles */
+@media only screen and (max-width: 600px) {
+    p {
+        font-size: 14px;
+    }
+
+    .blue {
+        font-size: 65px;
+    }
+}
+
+/* Desktop Styles */
+@media only screen and (min-width: 601px) {
+    p {
+        font-size: 18px;
+    }
+
+    .blue {
+        font-size: 100px;
+        margin-left: 100px;
+    }
+}

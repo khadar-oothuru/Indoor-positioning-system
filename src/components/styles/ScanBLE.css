@@ -1,0 +1,89 @@
+/* General styles for desktop screens */
+.scan-ble-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+/* .back-link-scan {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: blue;
+} */
+
+/* .back-icon-scan {
+    position: absolute;
+    top: 100px;
+    left: 10px;
+    color: rgb(51, 176, 211);
+} */
+
+.page-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.scan-button {
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.scan-button:hover {
+    background-color: #0056b3;
+}
+
+.scanned-devices {
+    margin-top: 20px;
+}
+
+.scanned-devices h3 {
+    font-size: 20px;
+}
+
+.scanned-devices ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.scanned-devices li {
+    font-size: 16px;
+}
+
+/* Styles for mobile screens */
+@media (max-width: 600px) {
+    .scan-ble-page {
+        padding: 10px;
+    }
+
+    .page-title {
+        font-size: 20px;
+    }
+
+    .scan-button {
+        font-size: 16px;
+        padding: 8px 16px;
+    }
+
+    .scanned-devices h3 {
+        font-size: 16px;
+    }
+
+    .scanned-devices li {
+        font-size: 14px;
+    }
+    .back-icon-scan {
+        position: absolute;
+        top: 100px;
+        font-size: 25px;
+        left: 10px;
+        color: rgb(51, 176, 211);
+    }
+}
