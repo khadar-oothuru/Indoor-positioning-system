@@ -12,6 +12,7 @@ const Positioning = () => {
   const [scannedDevices, setScannedDevices] = useState([]);
   const [position, setPosition] = useState({ x: null, y: null });
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [imageCoordinates, setImageCoordinates] = useState(null);
 
   // Function to update current time
   const updateCurrentTime = () => {
@@ -53,6 +54,13 @@ const Positioning = () => {
 
       setScannedDevices(scannedDevicesData);
       toast.success("Scanning complete!"); // Display toast message
+
+      // Calculate image coordinates after scanning devices
+      if (scannedDevicesData.length >= 3) {
+        const estimatedPosition = trilateration(scannedDevicesData);
+        setPosition(estimatedPosition);
+        calculateImageCoordinates(estimatedPosition);
+      }
     } catch (error) {
       console.error("Error scanning BLE devices:", error);
       toast.error("Error scanning BLE devices"); // Display error toast message
@@ -94,13 +102,14 @@ const Positioning = () => {
     return { x: xAvg, y: yAvg };
   };
 
-  useEffect(() => {
-    // Estimate position when there are enough RSSI measurements (at least 3)
-    if (scannedDevices.length >= 3) {
-      const estimatedPosition = trilateration(scannedDevices);
-      setPosition(estimatedPosition);
-    }
-  }, [scannedDevices]);
+  // Calculate image coordinates based on estimated position
+  const calculateImageCoordinates = (estimatedPosition) => {
+    // Replace this with your image coordinate calculation logic
+    // For demonstration purposes, let's assume the image is positioned relative to the estimated position
+    const imageX = estimatedPosition.x + 2; // Offset by 2 units
+    const imageY = estimatedPosition.y + 2; // Offset by 2 units
+    setImageCoordinates({ x: imageX, y: imageY });
+  };
 
   // Real-time update of destination state as user types
   const handleDestinationChange = (e) => {
@@ -146,6 +155,12 @@ const Positioning = () => {
         <div>
           <h2>Estimated Position:</h2>
           <p>X: {position.x}, Y: {position.y}</p>
+        </div>
+      )}
+      {imageCoordinates && (
+        <div>
+          <h2>Image Coordinates:</h2>
+          <p>X: {imageCoordinates.x}, Y: {imageCoordinates.y}</p>
         </div>
       )}
     </>
