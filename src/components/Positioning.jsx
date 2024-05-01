@@ -11,18 +11,23 @@ const Positioning = () => {
   const [detailsInserted, setDetailsInserted] = useState(false);
   const [scannedDevices, setScannedDevices] = useState([]);
   const [position, setPosition] = useState({ x: null, y: null });
+  const [currentTime, setCurrentTime] = useState(new Date());
 
-  const handleSearch = () => {
+  // Function to update current time
+  const updateCurrentTime = () => {
+    setCurrentTime(new Date());
+  };
+
+  useEffect(() => {
+    // Update current time every second
+    const interval = setInterval(updateCurrentTime, 1000);
+
+    // Clear interval on component unmount
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleSearch = async () => {
     setDetailsInserted(true);
-  };
-
-  // Real-time update of destination state as user types
-  const handleDestinationChange = (e) => {
-    setDestination(e.target.value);
-  };
-
-  // Function to scan BLE devices and retrieve RSSI measurements
-  const scanBLEDevices = async () => {
     try {
       const options = {
         acceptAllDevices: true, // Accept all BLE devices
@@ -97,6 +102,18 @@ const Positioning = () => {
     }
   }, [scannedDevices]);
 
+  // Real-time update of destination state as user types
+  const handleDestinationChange = (e) => {
+    setDestination(e.target.value);
+  };
+
+  // Handle "Enter" key press to trigger search
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
   return (
     <>
       <Nav />
@@ -105,15 +122,16 @@ const Positioning = () => {
         <Link to="/" className="back-link">
           <FaArrowCircleLeft className="back-icon" />
         </Link>
-        <div className="time">01:20</div>
+        <div className="time">{currentTime.toLocaleTimeString()}</div>
         <div className="title">Search position here!</div>
-        <p>Press Search button to find paired devices</p>
+        <p>Press Search button or Enter key to find paired devices</p>
         <div className="destination">
           <p>Destination</p>
           <input
             type="text"
             value={destination}
             onChange={handleDestinationChange}
+            onKeyPress={handleKeyPress} // Listen for "Enter" key press
             className="destination-input"
           />
         </div>
