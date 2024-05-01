@@ -7,10 +7,10 @@ import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 import "../components/styles/ScanBLE.css";
 
 const ScanBLEPage = () => {
-  // State to store scanned BLE devices
+  // State to store scanned BLE devices and their RSSI values
   const [scannedDevices, setScannedDevices] = useState([]);
 
-  // Function to scan BLE devices
+  // Function to scan BLE devices and retrieve RSSI measurements
   const scanBLEDevices = async () => {
     try {
       const options = {
@@ -19,11 +19,21 @@ const ScanBLEPage = () => {
 
       const devices = await navigator.bluetooth.requestDevice(options);
 
-      // Extract device information
-      const scannedDevicesData = devices.map((device) => ({
-        id: device.id,
-        name: device.name,
-      }));
+      // Retrieve RSSI measurements for each device
+      const scannedDevicesData = await Promise.all(
+        devices.map(async (device) => {
+          const rssi = await device.gatt.connect()
+            .then(() => device.gatt.getPrimaryService("battery_service"))
+            .then(service => service.getCharacteristic("battery_level"))
+            .then(characteristic => characteristic.readValue());
+
+          return {
+            id: device.id,
+            name: device.name,
+            rssi: rssi,
+          };
+        })
+      );
 
       setScannedDevices(scannedDevicesData);
       toast.success("Scanning complete!"); // Display toast message
@@ -49,7 +59,9 @@ const ScanBLEPage = () => {
           <h3>Scanned Devices:</h3>
           <ul>
             {scannedDevices.map((device, index) => (
-              <li key={index}>{device.name}</li>
+              <li key={index}>
+                {device.name} - RSSI: {device.rssi}
+              </li>
             ))}
           </ul>
         </div>

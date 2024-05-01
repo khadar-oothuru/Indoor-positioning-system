@@ -2,11 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Nav from "./Nav";
 import { FaArrowCircleLeft } from "react-icons/fa";
+import { toast, ToastContainer } from "react-toastify"; // Import toast and ToastContainer
+import "react-toastify/dist/ReactToastify.css";
 import "../components/styles/Positioning.css";
 
 const Positioning = () => {
   const [destination, setDestination] = useState("");
   const [detailsInserted, setDetailsInserted] = useState(false);
+  const [scannedDevices, setScannedDevices] = useState([]);
+  const [position, setPosition] = useState({ x: null, y: null });
 
   const handleSearch = () => {
     setDetailsInserted(true);
@@ -17,40 +21,115 @@ const Positioning = () => {
     setDestination(e.target.value);
   };
 
-  // Real-time functionality to perform actions based on destination state
+  // Function to scan BLE devices and retrieve RSSI measurements
+  const scanBLEDevices = async () => {
+    try {
+      const options = {
+        acceptAllDevices: true, // Accept all BLE devices
+      };
+
+      const devices = await navigator.bluetooth.requestDevice(options);
+
+      // Retrieve RSSI measurements for each device
+      const scannedDevicesData = await Promise.all(
+        devices.map(async (device) => {
+          const rssi = await device.gatt.connect()
+            .then(() => device.gatt.getPrimaryService("battery_service"))
+            .then(service => service.getCharacteristic("battery_level"))
+            .then(characteristic => characteristic.readValue());
+
+          return {
+            id: device.id,
+            name: device.name,
+            rssi: rssi,
+          };
+        })
+      );
+
+      setScannedDevices(scannedDevicesData);
+      toast.success("Scanning complete!"); // Display toast message
+    } catch (error) {
+      console.error("Error scanning BLE devices:", error);
+      toast.error("Error scanning BLE devices"); // Display error toast message
+    }
+  };
+
+  // Trilateration function
+  const trilateration = (devices) => {
+    // Replace this with your trilateration logic
+    // For demonstration purposes, let's assume the positions of BLE devices
+    const bleDevicePositions = [
+      { x: 0, y: 0 },
+      { x: 5, y: 0 },
+      { x: 0, y: 5 },
+    ];
+
+    // Get RSSI measurements from scanned devices
+    const rssis = devices.map((device) => device.rssi);
+
+    const numDevices = bleDevicePositions.length;
+    let xSum = 0;
+    let ySum = 0;
+    let weightSum = 0;
+
+    for (let i = 0; i < numDevices; i++) {
+      const { x, y } = bleDevicePositions[i];
+      const rssi = rssis[i];
+
+      // Weighted average calculation
+      const weight = Math.pow(10, (-69 - rssi) / (10 * 2)); 
+      xSum += x * weight;
+      ySum += y * weight;
+      weightSum += weight;
+    }
+
+    const xAvg = xSum / weightSum;
+    const yAvg = ySum / weightSum;
+
+    return { x: xAvg, y: yAvg };
+  };
+
   useEffect(() => {
-    // Example: Perform an action whenever destination state changes
-    console.log("Destination:", destination);
-  }, [destination]); // Run this effect whenever destination state changes
+    // Estimate position when there are enough RSSI measurements (at least 3)
+    if (scannedDevices.length >= 3) {
+      const estimatedPosition = trilateration(scannedDevices);
+      setPosition(estimatedPosition);
+    }
+  }, [scannedDevices]);
 
   return (
-<>
-
-    <Nav />
-    <div className="bluetooth-finder">
-      
-      <Link to="/" className="back-link">
-        <FaArrowCircleLeft className="back-icon" />
-      </Link>
-      <div className="time">01:20</div>
-      <div className="title">Search position here !</div>
-      <p>Press Search button to find paired devices</p>
-      <div className="destination">
-        <p>Destination</p>
-        <input
-          type="text"
-          value={destination}
-          onChange={handleDestinationChange}
-          className="destination-input"
-        />
+    <>
+      <Nav />
+      <ToastContainer />
+      <div className="bluetooth-finder">
+        <Link to="/" className="back-link">
+          <FaArrowCircleLeft className="back-icon" />
+        </Link>
+        <div className="time">01:20</div>
+        <div className="title">Search position here!</div>
+        <p>Press Search button to find paired devices</p>
+        <div className="destination">
+          <p>Destination</p>
+          <input
+            type="text"
+            value={destination}
+            onChange={handleDestinationChange}
+            className="destination-input"
+          />
+        </div>
+        {detailsInserted && (
+          <p className="success">Details Inserted Successfully</p>
+        )}
+        <button onClick={handleSearch} className="search-button">
+          SEARCH
+        </button>
       </div>
-      {detailsInserted && (
-        <p className="success">Details Inserted Successfully</p>
+      {position.x !== null && position.y !== null && (
+        <div>
+          <h2>Estimated Position:</h2>
+          <p>X: {position.x}, Y: {position.y}</p>
+        </div>
       )}
-      <button onClick={handleSearch} className="search-button">
-        SEARCH
-      </button>
-    </div>
     </>
   );
 };
