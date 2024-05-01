@@ -13,6 +13,7 @@ const Positioning = () => {
   const [position, setPosition] = useState({ x: null, y: null });
   const [currentTime, setCurrentTime] = useState(new Date());
   const [imageCoordinates, setImageCoordinates] = useState(null);
+  const [distanceAndCoordinates, setDistanceAndCoordinates] = useState(null); // State to store distances and coordinates
 
   // Function to update current time
   const updateCurrentTime = () => {
@@ -34,30 +35,25 @@ const Positioning = () => {
         acceptAllDevices: true, // Accept all BLE devices
       };
 
-      const devices = await navigator.bluetooth.requestDevice(options);
+      // Dummy array of device positions
+      const dummyDevicePositions = [
+        { id: 1, name: "living room", x: 1, y: 2 },
+        // { id: 2, name: "Device 2", x: 3, y: 4 },
+        // { id: 3, name: "Device 3", x: 5, y: 6 }
+      ];
 
-      // Retrieve RSSI measurements for each device
-      const scannedDevicesData = await Promise.all(
-        devices.map(async (device) => {
-          const rssi = await device.gatt.connect()
-            .then(() => device.gatt.getPrimaryService("battery_service"))
-            .then(service => service.getCharacteristic("battery_level"))
-            .then(characteristic => characteristic.readValue());
+      // Calculate distances and coordinates from the dummy array
+      const distancesAndCoordinates = dummyDevicePositions.map(device => {
+        const distance = Math.sqrt(Math.pow(position.x - device.x, 2) + Math.pow(position.y - device.y, 2));
+        return { id: device.id, name: device.name, distance: distance, x: device.x, y: device.y };
+      });
 
-          return {
-            id: device.id,
-            name: device.name,
-            rssi: rssi,
-          };
-        })
-      );
-
-      setScannedDevices(scannedDevicesData);
-      toast.success("Scanning complete!"); // Display toast message
+      // Set state to display distances and coordinates
+      setDistanceAndCoordinates(distancesAndCoordinates);
 
       // Calculate image coordinates after scanning devices
-      if (scannedDevicesData.length >= 3) {
-        const estimatedPosition = trilateration(scannedDevicesData);
+      if (distancesAndCoordinates.length >= 3) {
+        const estimatedPosition = trilateration(distancesAndCoordinates);
         setPosition(estimatedPosition);
         calculateImageCoordinates(estimatedPosition);
       }
@@ -71,14 +67,10 @@ const Positioning = () => {
   const trilateration = (devices) => {
     // Replace this with your trilateration logic
     // For demonstration purposes, let's assume the positions of BLE devices
-    const bleDevicePositions = [
-      { x: 0, y: 0 },
-      { x: 5, y: 0 },
-      { x: 0, y: 5 },
-    ];
+    const bleDevicePositions = devices.map(device => ({ x: device.x, y: device.y }));
 
-    // Get RSSI measurements from scanned devices
-    const rssis = devices.map((device) => device.rssi);
+    // Get distances from scanned devices
+    const distances = devices.map(device => device.distance);
 
     const numDevices = bleDevicePositions.length;
     let xSum = 0;
@@ -87,10 +79,10 @@ const Positioning = () => {
 
     for (let i = 0; i < numDevices; i++) {
       const { x, y } = bleDevicePositions[i];
-      const rssi = rssis[i];
+      const distance = distances[i];
 
       // Weighted average calculation
-      const weight = Math.pow(10, (-69 - rssi) / (10 * 2)); 
+      const weight = 1 / distance; 
       xSum += x * weight;
       ySum += y * weight;
       weightSum += weight;
@@ -161,6 +153,16 @@ const Positioning = () => {
         <div>
           <h2>Image Coordinates:</h2>
           <p>X: {imageCoordinates.x}, Y: {imageCoordinates.y}</p>
+        </div>
+      )}
+      {distanceAndCoordinates && (
+        <div>
+          <h2>Distances and Coordinates:</h2>
+          {distanceAndCoordinates.map(device => (
+            <p key={device.id}>
+              {device.name} - Distance: {device.distance}, X: {device.x}, Y: {device.y}
+            </p>
+          ))}
         </div>
       )}
     </>
