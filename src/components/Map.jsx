@@ -17,10 +17,10 @@ const Map = () => {
         <div className="map-content">
           <h2>This is the map</h2>
         
-          <p>
+          {/* <p>
             Here is some content related to the map. You can add more text or
             other elements here.
-          </p>
+          </p> */}
           <img src={map} alt="Beacon" className="beacon-image" />
         </div>
       </div>
