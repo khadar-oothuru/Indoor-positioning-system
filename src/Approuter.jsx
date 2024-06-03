@@ -11,7 +11,7 @@ const AppRouter = () => {
     <Router>
       <Routes>
         <Route exact path="/" element={<Homepage/>} />
-        <Route exact path="/scan-ble" element={<ScanBLE/>} />
+        <Route exact path="/scanble" element={<ScanBLE/>} />
         <Route exact path="/map" element={<Map/>} />
         <Route exact path="/position" element={<Positioning/>} />
         </Routes>

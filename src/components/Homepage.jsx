@@ -11,7 +11,7 @@ const Homepage = () => {
       <Nav />
       <p className="blue-heading">Bluetooth Navigation</p>
       <Bluetooth />
-      <Link to="/scan-ble">
+      <Link to="/scanble">
         <button className="custom-button">Scan BLE</button>
       </Link>
       <Link to="/map">

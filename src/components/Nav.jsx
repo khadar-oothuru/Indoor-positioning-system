@@ -5,7 +5,7 @@ const Nav = () => {
   return (
     <div className="nav-heading">
     
-      <h1>   Bluetooth Finder</h1>
+      <h1>Bluetooth Finder</h1>
     </div>
   );
 };
